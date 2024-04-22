@@ -1,5 +1,5 @@
 /* groovylint-disable-next-line CompileStatic */
-pipeline() {
+pipeline {
     agent any
 
     stages {
@@ -16,7 +16,7 @@ pipeline() {
                           extensions: [], 
                           submoduleCfg: [], 
                           userRemoteConfigs: [[credentialsId: 'github', 
-                                               url: 'git@github.com:erickkendall/pipeline-study.git']]])
+                                               url: 'git@github.com:erickkendall/jenkins-pipeline-study.git']]])
             }
         }
     }
