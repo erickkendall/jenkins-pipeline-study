@@ -3,8 +3,8 @@ pipeline {
     agent any
     environment {
         TF_PLAN_FILE = 'terraform.tfplan'
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        // AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        // AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
     stages {
         stage('Checkout') {
@@ -37,9 +37,8 @@ pipeline {
                     // Configure AWS credentials
                     withCredentials([[
                         $class: 'AmazonWebServicesCredentialsBinding',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        credentialsId: AWS_ACCESS_KEY_ID,
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        accessKeyVariable: AWS_ACCESS_KEY_ID,
+                        secretKeyVariable: AWS_SECRET_ACCESS_KEY
                     ]]) {
                         // Run terraform plan
                         sh 'terraform plan -out=$TF_PLAN_FILE'
