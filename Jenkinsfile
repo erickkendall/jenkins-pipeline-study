@@ -35,25 +35,25 @@ pipeline {
 
                     // Call the extracted method
                     handleValidationStatus(validateStatus)
-                        error('Terraform validation failed. Exiting...')
-                    } else {
-                        echo 'Terraform validation successful.'
-                    }
+                    error('Terraform validation failed. Exiting...')
+                } else {
+                    echo 'Terraform validation successful.'
                 }
             }
         }
-        stage('Terraform Plan') {
+        stage('Set AWS Credentials and Terraform Plan') {
             steps {
                 script {
-                    // Configure AWS credentials
-                    withCredentials([[
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        accessKeyVariable: AWS_ACCESS_KEY_ID,
-                        secretKeyVariable: AWS_SECRET_ACCESS_KEY
-                    ]]) {
-                        // Run terraform plan
-                        sh 'terraform plan -out=$TF_PLAN_FILE'
-                    }
+                    // Retrieve AWS credentials
+                    def awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
+                    def awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
+
+                    // Set environment variables
+                    env.AWS_ACCESS_KEY_ID = awsAccessKeyId
+                    env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
+
+                    // Run terraform plan
+                    sh "terraform plan -out=$TF_PLAN_FILE"
                 }
             }
         }
