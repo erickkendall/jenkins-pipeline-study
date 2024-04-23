@@ -18,6 +18,8 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 sh 'terraform init'
+            }
+        }
         stage('Terraform Validate') {
             steps {
                 script {
@@ -71,5 +73,5 @@ pipeline {
                 }
             }
         }
-            }
-        }
+    }
+}
