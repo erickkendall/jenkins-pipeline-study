@@ -18,13 +18,11 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 sh 'terraform init'
-            }
-        }
         stage('Terraform Validate') {
             steps {
                 script {
-                    // Define a method to handle validation status
-                    def handleValidationStatus(int status) {
+                    // Define a Closure to handle validation status
+                    def handleValidationStatus = { int status ->
                         if (status != 0) {
                             echo 'Terraform validation failed. Exiting...'
                             error('Terraform validation failed. Exiting...')
@@ -36,7 +34,7 @@ pipeline {
                     // Run terraform validate
                     int validateStatus = sh script: 'terraform validate', returnStatus: true
 
-                    // Call the method to handle validation status
+                    // Call the Closure to handle validation status
                     handleValidationStatus(validateStatus)
                 }
             }
@@ -73,5 +71,5 @@ pipeline {
                 }
             }
         }
-    }
-}
+            }
+        }
