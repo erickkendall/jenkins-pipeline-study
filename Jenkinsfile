@@ -25,12 +25,11 @@ pipeline {
                 // Run terraform validate
                 script {
                     def validateStatus = sh script: 'terraform validate', returnStatus: true
-                    def handleValidationStatus(int validateStatus) {
-                        if (validateStatus != 0) {
-                            error('Terraform validation failed. Exiting...')
-                        } else {
-                            echo 'Terraform validation successful.'
-                        }
+                    if (validateStatus != 0) {
+                        echo 'Terraform validation failed. Exiting...'
+                        error('Terraform validation failed. Exiting...')
+                    } else {
+                        echo 'Terraform validation successful.'
                     }
                 }
             }
