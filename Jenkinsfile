@@ -31,5 +31,21 @@ pipeline {
                 }
             }
         }
+        stage('Terraform Plan') {
+            steps {dd
+                script {
+                    // Configure AWS credentials
+                    withCredentials([[
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        credentialsId: AWS_ACCESS_KEY_ID,
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]]) {
+                        // Run terraform plan
+                        sh 'terraform plan -out=$TF_PLAN_FILE'
+                    }
+                }
+            }
+        }
     }
 }
