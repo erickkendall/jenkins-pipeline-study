@@ -2,7 +2,7 @@
 pipeline {
     agent any
     environment {
-        TF_PLAN_FILE = 'terraform.tfplan'
+        TF_PLAN_FILE          = "terraform.tfplan-${getTimestamp()}"
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
@@ -20,20 +20,27 @@ pipeline {
                 sh 'terraform init'
             }
         }
-        stage('Terraform Validate') {
+ .      stage('Terraform Validate') {
             steps {
-                // Run terraform validate
                 script {
-                    def validateStatus = sh script: 'terraform validate', returnStatus: true
-                    if (validateStatus != 0) {
-                        echo 'Terraform validation failed. Exiting...'
-                        error('Terraform validation failed. Exiting...')
-                    } else {
-                        echo 'Terraform validation successful.'
+                    // Run terraform validate
+                    int validateStatus = sh script: 'terraform validate', returnStatus: true
+
+                    // Define a method to handle validation status
+                    def handleValidationStatus(int status) {
+                        if (status != 0) {
+                            echo 'Terraform validation failed. Exiting...'
+                            error('Terraform validation failed. Exiting...')
+                        } else {
+                            echo 'Terraform validation successful.'
+                        }
                     }
+
+                    // Call the method to handle validation status
+                    handleValidationStatus(validateStatus)
                 }
             }
-        }
+ }
         stage('Set AWS Credentials and Terraform Plan') {
             steps {
                 script {
@@ -47,6 +54,22 @@ pipeline {
 
                     // Run terraform plan
                     sh "terraform plan -out=$TF_PLAN_FILE"
+                }
+            }
+        }
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    // Retrieve AWS credentials
+                    def awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
+                    def awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
+
+                    // Set environment variables
+                    env.AWS_ACCESS_KEY_ID = awsAccessKeyId
+                    env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
+
+                    // Apply Terraform changes
+                    sh "terraform apply $TF_PLAN_FILE"
                 }
             }
         }
