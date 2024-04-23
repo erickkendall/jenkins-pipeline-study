@@ -7,11 +7,6 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('AWS').'Secret Access Key'
     }
     stages {
-        stage('List Files') {
-            steps {
-                sh 'ls -l'
-            }
-        }
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM', 
@@ -19,8 +14,8 @@ pipeline {
                           doGenerateSubmoduleConfigurations: false, 
                           extensions: [], 
                           submoduleCfg: [], 
-                          userRemoteConfigs: [[credentialsId: 'github', 
-                                               url: 'git@github.com:erickkendall/jenkins-pipeline-study.git']]])
+                          userRemoteConfigs: [[credentialsId: 'GitHub', 
+                                               url: 'git@github.com:erickkendall/pipeline-study.git']]])
             }
         }
         stage('Terraform Init') {
@@ -31,7 +26,7 @@ pipeline {
         stage('Terraform Validate') {
             steps {
                 script {
-                    def tfValidate = sh(script: 'terraform validate', returnStatus: true)
+                    int tfValidate = sh(script: 'terraform validate', returnStatus: true)
                     def handleTfValidationResult(int tfValidate) {
                         if (tfValidate != 0) {
                             error 'Terraform validation failed!'
@@ -43,7 +38,7 @@ pipeline {
                     stage('Terraform Validate') {
                         steps {
                             script {
-                                def tfValidate = sh(script: 'terraform validate', returnStatus: true)
+                                int tfValidate = sh(script: 'terraform validate', returnStatus: true)
                                 handleTfValidationResult(tfValidate)
                             }
                         }
@@ -53,14 +48,5 @@ pipeline {
                 }
             }
         }
-        stage('Terraform Plan') {
-            steps {
-                sh "terraform plan -out=$TF_PLAN_FILE"
-            }
-        }
-        stage('Terraform Apply') {
-            steps {
-                sh "terraform apply $TF_PLAN_FILE"
-            }
-        }
     }
+}
