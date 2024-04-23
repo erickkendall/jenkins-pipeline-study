@@ -32,7 +32,7 @@ pipeline {
             }
         }
         stage('Terraform Plan') {
-            steps {dd
+            steps {
                 script {
                     // Configure AWS credentials
                     withCredentials([[
