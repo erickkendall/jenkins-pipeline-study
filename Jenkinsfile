@@ -2,7 +2,7 @@
 pipeline {
     agent any
     environment {
-        TF_PLAN_FILE          = "terraform.tfplan"
+        TF_PLAN_FILE          = 'terraform.tfplan'
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
@@ -22,9 +22,6 @@ pipeline {
                 }
             }
         }
-
-    // Add more stages if needed
-    }
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM',
@@ -91,5 +88,5 @@ pipeline {
                 }
             }
         }
-}
+    }
 }
