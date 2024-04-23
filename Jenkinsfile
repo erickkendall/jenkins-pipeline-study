@@ -2,11 +2,29 @@
 pipeline {
     agent any
     environment {
-        TF_PLAN_FILE          = "terraform.tfplan-${getTimestamp()}"
+        TF_PLAN_FILE          = "terraform.tfplan"
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
     stages {
+
+        stage('Get Timestamp') {
+            steps {
+                script {
+                    // Get current build timestamp
+                    def timestamp = currentBuild.startTimeInMillis
+
+                    // Convert timestamp to human-readable format (optional)
+                    def date = new Date(timestamp)
+                    def formattedDate = date.format('yyyy-MM-dd_HH-mm-ss')
+
+                    echo "Timestamp: ${formattedDate}"
+                }
+            }
+        }
+
+    // Add more stages if needed
+    }
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM',
@@ -73,5 +91,5 @@ pipeline {
                 }
             }
         }
-    }
+}
 }
