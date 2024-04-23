@@ -32,12 +32,6 @@ pipeline {
                             echo 'Terraform validation successful.'
                         }
                     }
-
-                    // Call the extracted method
-                    handleValidationStatus(validateStatus)
-                    error('Terraform validation failed. Exiting...')
-                } else {
-                    echo 'Terraform validation successful.'
                 }
             }
         }
