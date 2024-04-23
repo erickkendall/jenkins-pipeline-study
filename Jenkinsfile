@@ -14,8 +14,8 @@ pipeline {
                           doGenerateSubmoduleConfigurations: false, 
                           extensions: [], 
                           submoduleCfg: [], 
-                          userRemoteConfigs: [[credentialsId: 'GitHub', 
-                                               url: 'git@github.com:erickkendall/pipeline-study.git']]])
+                          userRemoteConfigs: [[credentialsId: 'github', 
+                          url: 'git@github.com:erickkendall/pipeline-study.git']]])
             }
         }
         stage('Terraform Init') {
