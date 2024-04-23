@@ -9,13 +9,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', 
-                          branches: [[name: 'main']], 
-                          doGenerateSubmoduleConfigurations: false, 
-                          extensions: [], 
-                          submoduleCfg: [], 
-                          userRemoteConfigs: [[credentialsId: 'github', 
-                          url: 'git@github.com:erickkendall/pipeline-study.git']]])
+                checkout([$class: 'GitSCM',
+                          branches: [[name: '*/main']],
+                          userRemoteConfigs: [[credentialsId: 'github',
+                                                url: 'git@github.com:erickkendall/jenkins-pipeline-study.git']]])
             }
         }
         stage('Terraform Init') {
