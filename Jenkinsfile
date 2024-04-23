@@ -20,12 +20,9 @@ pipeline {
                 sh 'terraform init'
             }
         }
- .      stage('Terraform Validate') {
+        stage('Terraform Validate') {
             steps {
                 script {
-                    // Run terraform validate
-                    int validateStatus = sh script: 'terraform validate', returnStatus: true
-
                     // Define a method to handle validation status
                     def handleValidationStatus(int status) {
                         if (status != 0) {
@@ -36,11 +33,14 @@ pipeline {
                         }
                     }
 
+                    // Run terraform validate
+                    int validateStatus = sh script: 'terraform validate', returnStatus: true
+
                     // Call the method to handle validation status
                     handleValidationStatus(validateStatus)
                 }
             }
- }
+        }
         stage('Set AWS Credentials and Terraform Plan') {
             steps {
                 script {
