@@ -23,30 +23,5 @@ pipeline {
                 sh 'terraform init'
             }
         }
-        stage('Terraform Validate') {
-            steps {
-                script {
-                    int tfValidate = sh(script: 'terraform validate', returnStatus: true)
-                    def handleTfValidationResult(int tfValidate) {
-                        if (tfValidate != 0) {
-                            error 'Terraform validation failed!'
-                        }
-                    }
-
-                    // ...
-
-                    stage('Terraform Validate') {
-                        steps {
-                            script {
-                                int tfValidate = sh(script: 'terraform validate', returnStatus: true)
-                                handleTfValidationResult(tfValidate)
-                            }
-                        }
-                    }
-                        error 'Terraform validation failed!'
-                    }
-                }
-            }
-        }
     }
 }
