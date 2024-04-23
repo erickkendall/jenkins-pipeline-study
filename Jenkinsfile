@@ -20,5 +20,16 @@ pipeline {
                 sh 'terraform init'
             }
         }
+        stage('Terraform Validate') {
+            steps {
+                // Run terraform validate
+                script {
+                    def validateStatus = sh script: 'terraform validate', returnStatus: true
+                    if (validateStatus != 0) {
+                        error('Terraform validation failed. Exiting...')
+                    }
+                }
+            }
+        }
     }
 }
