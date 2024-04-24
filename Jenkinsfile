@@ -3,10 +3,22 @@ pipeline {
     agent any
     environment {
         TF_PLAN_FILE          = 'terraform.tfplan'
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
+
+    // Define global variables for AWS credentials
+    String awsAccessKeyId
+    String awsSecretAccessKey
+
     stages {
+        stage('Get AWS Credentials') {
+            steps {
+                script {
+                    // Retrieve AWS credentials
+                    awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
+                    awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
+                }
+            }
+        }
         stage('Get Timestamp') {
             steps {
                 script {
@@ -37,37 +49,30 @@ pipeline {
         stage('Terraform Validate') {
             steps {
                 script {
-                    // Define a Closure to handle validation status
-                    def handleValidationStatus = { int status ->
-                        if (status != 0) {
-                            echo 'Terraform validation failed. Exiting...'
-                            error('Terraform validation failed. Exiting...')
-                        } else {
-                            echo 'Terraform validation successful.'
-                        }
-                    }
-
                     // Run terraform validate
                     int validateStatus = sh script: 'terraform validate', returnStatus: true
-
-                    // Call the Closure to handle validation status
-                    handleValidationStatus(validateStatus)
+                    if (validateStatus != 0) {
+                        error('Terraform validation failed. Exiting...')
+                    }
                 }
             }
         }
-        stage('Set AWS Credentials and Terraform Plan') {
+        stage('Terraform Plan') {
             steps {
                 script {
-                    // Retrieve AWS credentials
-                    def awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
-                    def awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
-
-                    // Set environment variables
-                    env.AWS_ACCESS_KEY_ID = awsAccessKeyId
-                    env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
-
-                    // Run terraform plan
+                    // Run terraform plan and capture the result
                     def planOutput = sh(script: 'terraform plan -out=$TF_PLAN_FILE', returnStdout: true).trim()
+
+                    // Check if there are any changes to apply
+                    if (planOutput.contains('No changes')) {
+                        echo 'No changes to apply. Exiting gracefully.'
+                        currentBuild.result = 'SUCCESS'
+                        return
+                    }
+
+                    // Print the plan output
+                    echo "Terraform plan output:"
+                    echo "${planOutput}"
                 }
             }
         }
@@ -79,8 +84,6 @@ pipeline {
                         echo 'No changes to apply. Skipping Terraform apply.'
                     } else {
                         // Retrieve AWS credentials
-                        def awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
-                        def awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
 
                         // Set environment variables
                         env.AWS_ACCESS_KEY_ID = awsAccessKeyId
