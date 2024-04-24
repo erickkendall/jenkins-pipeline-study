@@ -3,22 +3,7 @@ pipeline {
     agent any
     environment {
         TF_PLAN_FILE          = 'terraform.tfplan'
-    }
 
-    // Define global variables for AWS credentials
-    def awsAccessKeyId
-    def awsSecretAccessKey
-
-    stages {
-        stage('Get AWS Credentials') {
-            steps {
-                script {
-                    // Retrieve AWS credentials
-                    awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
-                    awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
-                }
-            }
-        }
         stage('Get Timestamp') {
             steps {
                 script {
@@ -60,6 +45,10 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
+
+                    env.AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+                    env.AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+
                     // Run terraform plan and capture the result
                     def planOutput = sh(script: 'terraform plan -out=$TF_PLAN_FILE', returnStdout: true).trim()
 
@@ -79,21 +68,18 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 script {
-                    // Check if the plan output contains any changes
-                    if (planOutput.contains('No changes')) {
-                        echo 'No changes to apply. Skipping Terraform apply.'
-                    } else {
-                        // Retrieve AWS credentials
 
-                        // Set environment variables
-                        env.AWS_ACCESS_KEY_ID = awsAccessKeyId
-                        env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
+                    // Retrieve AWS credentials
 
-                        // Apply Terraform changes
-                        sh "terraform apply $TF_PLAN_FILE"
-                    }
+                    // Set environment variables
+                    env.AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+                    env.AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+
+                    // Apply Terraform changes
+                    sh "terraform apply $TF_PLAN_FILE"
                 }
             }
         }
     }
+}
 }
