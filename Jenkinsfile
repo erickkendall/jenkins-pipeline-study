@@ -6,8 +6,8 @@ pipeline {
     }
 
     // Define global variables for AWS credentials
-    String awsAccessKeyId
-    String awsSecretAccessKey
+    def awsAccessKeyId
+    def awsSecretAccessKey
 
     stages {
         stage('Get AWS Credentials') {
