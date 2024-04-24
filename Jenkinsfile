@@ -7,7 +7,6 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
     stages {
-
         stage('Get Timestamp') {
             steps {
                 script {
@@ -68,23 +67,28 @@ pipeline {
                     env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
 
                     // Run terraform plan
-                    sh "terraform plan -out=$TF_PLAN_FILE"
+                    def planOutput = sh(script: 'terraform plan -out=$TF_PLAN_FILE', returnStdout: true).trim()
                 }
             }
         }
         stage('Terraform Apply') {
             steps {
                 script {
-                    // Retrieve AWS credentials
-                    def awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
-                    def awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
+                    // Check if the plan output contains any changes
+                    if (planOutput.contains('No changes')) {
+                        echo 'No changes to apply. Skipping Terraform apply.'
+                    } else {
+                        // Retrieve AWS credentials
+                        def awsAccessKeyId = credentials('AWS_ACCESS_KEY_ID')
+                        def awsSecretAccessKey = credentials('AWS_SECRET_ACCESS_KEY')
 
-                    // Set environment variables
-                    env.AWS_ACCESS_KEY_ID = awsAccessKeyId
-                    env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
+                        // Set environment variables
+                        env.AWS_ACCESS_KEY_ID = awsAccessKeyId
+                        env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
 
-                    // Apply Terraform changes
-                    sh "terraform apply $TF_PLAN_FILE"
+                        // Apply Terraform changes
+                        sh "terraform apply $TF_PLAN_FILE"
+                    }
                 }
             }
         }
